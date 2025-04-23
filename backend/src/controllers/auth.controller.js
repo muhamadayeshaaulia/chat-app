@@ -61,10 +61,10 @@ export const login = async (req, res) =>{
             return res.status(400).json({messages: "Invalid credentials"});
         }
         
-        generateToken(user,_id,res)
+        generateToken(user._id,res)
 
         res.status(200).json({
-            _id:user._id,
+            _id: user._id,
             fullName: user.fullName,
             email: user.email,
             profilePic: user.profilePic,
@@ -76,5 +76,15 @@ export const login = async (req, res) =>{
 };
 
 export const logout =  (req, res) =>{
-    res.send("logout route");
+    try {
+        res.cookie("jwt", "", {maxAge:0});
+        res.status(200).json({message: "Logged out successfully"});
+    } catch (error) {
+        console.log("Error in logout controller", error.message);
+        res.status(500).json({message: "Internal Server Error"});
+    }
+};
+
+export const updateProfile = async (req , res) => {
+
 };
