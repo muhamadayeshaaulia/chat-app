@@ -1,10 +1,12 @@
 import { useState } from "react";
 import { useAuthStore } from "../store/useAuthStore";
 import { Camera, Mail, User } from "lucide-react";
+import Swal from "sweetalert2";
 
 const ProfilePage = () => {
   const { authUser, isUpdatingProfile, updateProfile } = useAuthStore();
   const [selectedImg, setSelectedImg] = useState(null);
+  const [isModalOpen, setIsModalOpen] = useState(false);
 
   const handleImageUpload = async (e) => {
     const file = e.target.files[0];
@@ -16,9 +18,45 @@ const ProfilePage = () => {
 
     reader.onload = async () => {
       const base64Image = reader.result;
-      setSelectedImg(base64Image);
-      await updateProfile({ profilePic: base64Image });
+
+      // Notifikasi "Tunggu..."
+      Swal.fire({
+        title: "Uploading...",
+        text: "Please wait while we upload your photo",
+        allowOutsideClick: false,
+        didOpen: () => {
+          Swal.showLoading();
+        },
+      });
+
+      try {
+        await updateProfile({ profilePic: base64Image });
+        setSelectedImg(base64Image);
+
+        // Notifikasi berhasil
+        Swal.fire({
+          icon: "success",
+          title: "Success!",
+          text: "Profile photo updated successfully",
+          timer: 1500,
+          showConfirmButton: false,
+        });
+      } catch (error) {
+        Swal.fire({
+          icon: "error",
+          title: "Oops...",
+          text: "Something went wrong!",
+        });
+      }
     };
+  };
+
+  const handleImgClick = () => {
+    setIsModalOpen(true);
+  };
+
+  const handleCloseModal = () => {
+    setIsModalOpen(false);
   };
 
   return (
@@ -30,14 +68,14 @@ const ProfilePage = () => {
             <p className="mt-2">Your profile information</p>
           </div>
 
-          {/* avatar upload section */}
-
+          {/* Avatar upload section */}
           <div className="flex flex-col items-center gap-4">
             <div className="relative">
               <img
                 src={selectedImg || authUser.profilePic || "/avatar.png"}
                 alt="Profile"
-                className="size-32 rounded-full object-cover border-4 "
+                className="size-32 rounded-full object-cover border-4 cursor-pointer"
+                onClick={handleImgClick}
               />
               <label
                 htmlFor="avatar-upload"
@@ -65,6 +103,31 @@ const ProfilePage = () => {
             </p>
           </div>
 
+          {/* Modal for image preview */}
+          {isModalOpen && (
+            <div
+              className="fixed inset-0 bg-black bg-opacity-60 flex items-center justify-center z-50"
+              onClick={handleCloseModal}
+            >
+              <div
+                className="bg-base-100 p-6 rounded-xl shadow-lg relative"
+                onClick={(e) => e.stopPropagation()}
+              >
+                <button
+                  onClick={handleCloseModal}
+                  className="absolute top-2 right-2 text-white bg-red-500 hover:bg-red-600 rounded-full w-8 h-8 flex items-center justify-center"
+                >
+                  ×
+                </button>
+                <img
+                  src={selectedImg || authUser.profilePic || "/avatar.png"}
+                  alt="Enlarged Profile"
+                  className="w-64 h-64 object-cover rounded-full border-4 border-white shadow-xl"
+                />
+              </div>
+            </div>
+          )}
+
           <div className="space-y-6">
             <div className="space-y-1.5">
               <div className="text-sm text-zinc-400 flex items-center gap-2">
@@ -84,7 +147,7 @@ const ProfilePage = () => {
           </div>
 
           <div className="mt-6 bg-base-300 rounded-xl p-6">
-            <h2 className="text-lg font-medium  mb-4">Account Information</h2>
+            <h2 className="text-lg font-medium mb-4">Account Information</h2>
             <div className="space-y-3 text-sm">
               <div className="flex items-center justify-between py-2 border-b border-zinc-700">
                 <span>Member Since</span>
@@ -101,4 +164,5 @@ const ProfilePage = () => {
     </div>
   );
 };
+
 export default ProfilePage;
