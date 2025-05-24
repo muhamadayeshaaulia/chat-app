@@ -2,7 +2,7 @@
 
 ![Demo App](/frontend/public/Yechat.jpg)
 
-[Video Tutorial on Youtube](https://youtu.be/ntKkVrQqBYY)
+[Video on TokTok](https://www.tiktok.com/@programmer_amatir?_t=ZS-8wcMGYKjavR&_r=1)
 
 Highlights:
 
